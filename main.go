@@ -27,7 +27,15 @@ func completer(d prompt.Document) []prompt.Suggest {
 	}
 
 	if lastValidKeyword == "exec" {
-		return execCompleter()
+		return containerListCompleter(false)
+	}
+
+	if lastValidKeyword == "start" {
+		return containerListCompleter(true)
+	}
+
+	if lastValidKeyword == "stop" {
+		return containerListCompleter(false)
 	}
 
 	suggestions := []prompt.Suggest{
@@ -95,12 +103,10 @@ func completer(d prompt.Document) []prompt.Suggest {
 	return prompt.FilterHasPrefix(suggestions, word, true)
 }
 
-func execCompleter() []prompt.Suggest {
+func containerListCompleter(all bool) []prompt.Suggest {
 	suggestions := []prompt.Suggest{}
-
 	ctx := context.Background()
-
-	cList, _ := dockerClient.ContainerList(ctx, types.ContainerListOptions{})
+	cList, _ := dockerClient.ContainerList(ctx, types.ContainerListOptions{All: all})
 
 	for _, container := range cList {
 		suggestions = append(suggestions, prompt.Suggest{Text: container.Image, Description: container.ID})
