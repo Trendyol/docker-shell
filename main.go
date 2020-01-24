@@ -1,15 +1,35 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"os/exec"
 	"strings"
 
+	"docker.io/go-docker"
+	"docker.io/go-docker/api/types"
 	"github.com/c-bata/go-prompt"
 )
 
+var dockerClient *docker.Client
+var lastValidKeyword string
+
 func completer(d prompt.Document) []prompt.Suggest {
+	word := d.GetWordBeforeCursor()
+
+	for _, cmd := range strings.Split(d.Text, " ") {
+		if strings.HasPrefix(cmd, "-") {
+			continue
+		}
+
+		lastValidKeyword = cmd
+	}
+
+	if lastValidKeyword == "exec" {
+		return execCompleter()
+	}
+
 	suggestions := []prompt.Suggest{
 		{Text: "docker", Description: ""},
 		{Text: "attach", Description: "Attach local standard input, output, and error streams to a running container"},
@@ -72,11 +92,25 @@ func completer(d prompt.Document) []prompt.Suggest {
 		{Text: "exit", Description: "Exit command prompt"},
 	}
 
-	word := d.GetWordBeforeCursorUntilSeparator(" ")
 	return prompt.FilterHasPrefix(suggestions, word, true)
 }
 
+func execCompleter() []prompt.Suggest {
+	suggestions := []prompt.Suggest{}
+
+	ctx := context.Background()
+
+	cList, _ := dockerClient.ContainerList(ctx, types.ContainerListOptions{})
+
+	for _, container := range cList {
+		suggestions = append(suggestions, prompt.Suggest{Text: container.Image, Description: container.ID})
+	}
+
+	return suggestions
+}
+
 func main() {
+	dockerClient, _ = docker.NewEnvClient()
 run:
 	dockerCommand := prompt.Input(">>> ",
 		completer,
