@@ -12,6 +12,14 @@ import (
 func completer(d prompt.Document) []prompt.Suggest {
 	suggestions := []prompt.Suggest{
 		{Text: "docker", Description: ""},
+		{Text: "ps", Description: "List all processes which is running"},
+		{Text: "-a", Description: "List all processes"},
+		{Text: "images", Description: "List all images"},
+		{Text: "build", Description: "Build image"},
+		{Text: "-t", Description: "Tag an image"},
+		{Text: "exec", Description: "Run a command in a running container"},
+		{Text: "rm", Description: "Remove one or more containers"},
+		{Text: "rmi", Description: "Remove one or more containers"},
 		{Text: "exit", Description: "Exit command prompt"},
 	}
 
