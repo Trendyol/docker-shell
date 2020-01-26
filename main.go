@@ -15,27 +15,96 @@ import (
 var dockerClient *docker.Client
 var lastValidKeyword string
 
+func isDockerCommand(kw string) bool {
+	dockerCommands := []string{
+		"docker",
+		"attach",
+		"build",
+		"builder",
+		"checkpoint",
+		"commit",
+		"config",
+		"container",
+		"context",
+		"cp",
+		"create",
+		"diff",
+		"events",
+		"exec",
+		"export",
+		"history",
+		"image",
+		"images",
+		"import",
+		"info",
+		"inspect",
+		"kill",
+		"load",
+		"login",
+		"logout",
+		"logs",
+		"manifest",
+		"network",
+		"node",
+		"pause",
+		"plugin",
+		"port",
+		"ps",
+		"pull",
+		"push",
+		"rename",
+		"restart",
+		"rm",
+		"rmi",
+		"run",
+		"save",
+		"search",
+		"secret",
+		"service",
+		"stack",
+		"start",
+		"stats",
+		"stop",
+		"swarm",
+		"system",
+		"tag",
+		"top",
+		"trust",
+		"unpause",
+		"update",
+		"version",
+		"volume",
+		"wait",
+	}
+
+	for _, cmd := range dockerCommands {
+		if cmd == kw {
+			return true
+		}
+	}
+
+	return false
+}
+
 func completer(d prompt.Document) []prompt.Suggest {
 	word := d.GetWordBeforeCursor()
 
 	for _, cmd := range strings.Split(d.Text, " ") {
-		if strings.HasPrefix(cmd, "-") {
+		if strings.HasPrefix(cmd, "-") || strings.HasPrefix(cmd, "/") || cmd == "" {
 			continue
 		}
 
 		lastValidKeyword = cmd
 	}
 
-	if lastValidKeyword == "exec" {
-		return containerListCompleter(false)
-	}
+	if word == "" {
+		if lastValidKeyword == "exec" || lastValidKeyword == "stop" {
+			return containerListCompleter(false)
+		}
 
-	if lastValidKeyword == "start" {
-		return containerListCompleter(true)
-	}
-
-	if lastValidKeyword == "stop" {
-		return containerListCompleter(false)
+		if lastValidKeyword == "start" {
+			return containerListCompleter(true)
+		}
 	}
 
 	suggestions := []prompt.Suggest{
@@ -109,7 +178,7 @@ func containerListCompleter(all bool) []prompt.Suggest {
 	cList, _ := dockerClient.ContainerList(ctx, types.ContainerListOptions{All: all})
 
 	for _, container := range cList {
-		suggestions = append(suggestions, prompt.Suggest{Text: container.Image, Description: container.ID})
+		suggestions = append(suggestions, prompt.Suggest{Text: container.ID, Description: container.Image})
 	}
 
 	return suggestions
