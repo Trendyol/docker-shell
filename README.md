@@ -5,3 +5,9 @@
 A simple interactive prompt for docker. Inspired from [kube-prompt](https://github.com/c-bata/kube-prompt) uses [go-prompt](https://github.com/c-bata/go-prompt).
 
 [![asciicast](https://asciinema.org/a/lWXDinJt74BnsuhCEA6BkrYox.svg)](https://asciinema.org/a/lWXDinJt74BnsuhCEA6BkrYox)
+
+Features:
+
+* [X] Suggest docker commands
+* [X] List container ids&names after docker exec/start/stop commands
+* [ ] Suggest command parameters based on typed command
