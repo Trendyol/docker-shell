@@ -11,3 +11,13 @@ Features:
 * [X] Suggest docker commands
 * [X] List container ids&names after docker exec/start/stop commands
 * [ ] Suggest command parameters based on typed command
+
+<h3>Installation</h3>
+
+<b>Homebrew</b> :
+
+  `brew tap mstrYoda/docker-shell`
+
+  `brew install docker-shell`
+
+After install it you can type `docker-shell` and run interactive shell.
