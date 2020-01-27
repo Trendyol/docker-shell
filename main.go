@@ -98,6 +98,7 @@ func completer(d prompt.Document) []prompt.Suggest {
 	}
 
 	if word == "" {
+
 		if lastValidKeyword == "exec" || lastValidKeyword == "stop" {
 			return containerListCompleter(false)
 		}
@@ -108,7 +109,6 @@ func completer(d prompt.Document) []prompt.Suggest {
 	}
 
 	suggestions := []prompt.Suggest{
-		{Text: "docker", Description: ""},
 		{Text: "attach", Description: "Attach local standard input, output, and error streams to a running container"},
 		{Text: "build", Description: "Build an image from a Dockerfile"},
 		{Text: "builder", Description: "Manage builds"},
@@ -187,10 +187,10 @@ func containerListCompleter(all bool) []prompt.Suggest {
 func main() {
 	dockerClient, _ = docker.NewEnvClient()
 run:
-	dockerCommand := prompt.Input(">>> ",
+	dockerCommand := prompt.Input(">>> docker ",
 		completer,
 		prompt.OptionTitle("docker prompt"),
-		prompt.OptionSelectedDescriptionTextColor(prompt.LightGray),
+		prompt.OptionSelectedDescriptionTextColor(prompt.Turquoise),
 		prompt.OptionInputTextColor(prompt.Fuchsia),
 		prompt.OptionPrefixBackgroundColor(prompt.Cyan))
 
@@ -199,7 +199,14 @@ run:
 		os.Exit(0)
 	}
 
-	ps := exec.Command(splittedDockerCommands[0], splittedDockerCommands[1:]...)
+	var ps *exec.Cmd
+
+	if splittedDockerCommands[0] == "clear" {
+		ps = exec.Command("clear")
+	} else {
+		ps = exec.Command("docker", splittedDockerCommands...)
+	}
+
 	res, err := ps.Output()
 
 	if err != nil {
