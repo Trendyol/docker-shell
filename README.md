@@ -16,7 +16,7 @@ Features:
 
 <b>Homebrew</b> :
 
-  `brew tap brew tap trendyol/trendyol-tap`
+  `brew tap trendyol/trendyol-tap`
 
   `brew install docker-shell`
 
