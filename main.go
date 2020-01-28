@@ -106,6 +106,10 @@ func completer(d prompt.Document) []prompt.Suggest {
 		if lastValidKeyword == "start" {
 			return containerListCompleter(true)
 		}
+
+		if lastValidKeyword == "service" {
+			return dockerServiceCommandCompleter()
+		}
 	}
 
 	suggestions := []prompt.Suggest{
@@ -170,6 +174,20 @@ func completer(d prompt.Document) []prompt.Suggest {
 	}
 
 	return prompt.FilterHasPrefix(suggestions, word, true)
+}
+
+func dockerServiceCommandCompleter() []prompt.Suggest {
+	return []prompt.Suggest{
+		{Text: "create", Description: "Create a new service"},
+		{Text: "inspect", Description: "Display detailed information on one or more services"},
+		{Text: "logs", Description: "Fetch the logs of a service or task"},
+		{Text: "ls", Description: "List services"},
+		{Text: "ps", Description: "List the tasks of one or more services"},
+		{Text: "rm", Description: "Remove one or more services"},
+		{Text: "rollback", Description: "Revert changes to a service’s configuration"},
+		{Text: "scale", Description: "Scale one or multiple replicated services"},
+		{Text: "update", Description: "Update a service"},
+	}
 }
 
 func containerListCompleter(all bool) []prompt.Suggest {
