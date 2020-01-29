@@ -1,5 +1,7 @@
 module github.com/mstrYoda/docker-shell
 
+replace github.com/mstrYoda/docker-shell/lib => ./lib
+
 go 1.13
 
 require (
