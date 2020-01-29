@@ -10,7 +10,6 @@ require (
 	github.com/docker/go-connections v0.4.0 // indirect
 	github.com/docker/go-units v0.4.0 // indirect
 	github.com/gogo/protobuf v1.3.1 // indirect
-	github.com/kofalt/go-memoize v0.0.0-20190519021333-cf756f0462a4
 	github.com/mattn/go-runewidth v0.0.8 // indirect
 	github.com/mattn/go-tty v0.0.3 // indirect
 	github.com/opencontainers/go-digest v1.0.0-rc1 // indirect
