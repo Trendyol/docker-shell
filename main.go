@@ -125,7 +125,9 @@ func imageFetchCompleter(imageName string, count int) []prompt.Suggest {
 		url.Path = "/v2/repositories/library"
 		url.RawQuery = "page=1&page_size=" + strconv.Itoa(count)
 	}
-	client := &http.Client{}
+	client := &http.Client{
+	    Timeout: 2 * time.Second,
+	}
 	apiURL := url.String()
 
 	req, err := http.NewRequest("GET", apiURL, nil)
