@@ -99,7 +99,7 @@ func completer(d prompt.Document) []prompt.Suggest {
 
 	if word == "" {
 
-		if lastValidKeyword == "exec" || lastValidKeyword == "stop" {
+		if lastValidKeyword == "exec" || lastValidKeyword == "stop" || lastValidKeyword == "port" {
 			return containerListCompleter(false)
 		}
 
