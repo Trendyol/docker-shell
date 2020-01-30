@@ -11,7 +11,7 @@ Features:
 * [X] Suggest docker commands
 * [X] List container ids&names after docker exec/start/stop commands
 * [ ] Suggest command parameters based on typed command
-* [ ] List available images after docker pull command
+* [X] List images from docker hub after docker pull command
 
 <h3>Installation</h3>
 
