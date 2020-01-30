@@ -198,7 +198,7 @@ func completer(d prompt.Document) []prompt.Suggest {
 	if group != nil {
 		command := group["command"]
 
-		if command == "exec" || command == "stop" {
+		if command == "exec" || command == "stop" || command == "port" {
 			return containerListCompleter(false)
 		}
 
@@ -310,6 +310,15 @@ func containerListCompleter(all bool) []prompt.Suggest {
 
 func main() {
 	dockerClient, _ = docker.NewEnvClient()
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	defer cancel()
+	_, err := dockerClient.Info(ctx)
+	if err != nil {
+		fmt.Println("Couldn't check docker status please make sure docker is running.")
+		fmt.Println(err)
+		return
+	}
+
 run:
 	dockerCommand := prompt.Input(">>> docker ",
 		completer,
