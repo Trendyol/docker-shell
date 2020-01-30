@@ -2,15 +2,23 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"os"
 	"os/exec"
+	"regexp"
+	"strconv"
 	"strings"
 	"time"
 
+	"net/http"
+	"net/url"
+
 	"docker.io/go-docker"
 	"docker.io/go-docker/api/types"
+	"docker.io/go-docker/api/types/registry"
 	"github.com/c-bata/go-prompt"
+	"github.com/patrickmn/go-cache"
 )
 
 var dockerClient *docker.Client
@@ -87,29 +95,132 @@ func isDockerCommand(kw string) bool {
 	return false
 }
 
+//DockerHubResult : Wrap DockerHub API call
+type DockerHubResult struct {
+	PageCount        *int                    `json:"num_pages,omitempty"`
+	ResultCount      *int                    `json:"num_results,omitempty"`
+	ItemCountPerPage *int                    `json:"page_size,omitempty"`
+	CurrentPage      *int                    `json:"page,omitempty"`
+	Query            *string                 `json:"query,omitempty"`
+	Items            []registry.SearchResult `json:"results,omitempty"`
+}
+
+func imageFromHubAPI(count int) []registry.SearchResult {
+	url := url.URL{
+		Scheme:   "https",
+		Host:     "registry.hub.docker.com",
+		Path:     "/v2/repositories/library",
+		RawQuery: "page=1&page_size=" + strconv.Itoa(count),
+	}
+
+	client := &http.Client{
+		Timeout: 2 * time.Second,
+	}
+	apiURL := url.String()
+
+	req, err := http.NewRequest("GET", apiURL, nil)
+	if err != nil {
+		return nil
+	}
+	req.Header.Add("Content-Type", "application/json")
+	response, err := client.Do(req)
+	if err != nil {
+		return nil
+	}
+
+	defer response.Body.Close()
+
+	decoder := json.NewDecoder(response.Body)
+	searchResult := &DockerHubResult{}
+	decoder.Decode(searchResult)
+	return searchResult.Items
+}
+
+func imageFromContext(imageName string, count int) []registry.SearchResult {
+	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+	defer cancel()
+	ctxResponse, err := dockerClient.ImageSearch(ctx, imageName, types.ImageSearchOptions{Limit: count})
+	if err != nil {
+		return nil
+	}
+	return ctxResponse
+}
+
+func imageFetchCompleter(imageName string, count int) []prompt.Suggest {
+	searchResult := []registry.SearchResult{}
+	if imageName == "" {
+		searchResult = imageFromHubAPI(10)
+	} else {
+		searchResult = imageFromContext(imageName, 10)
+	}
+
+	suggestions := []prompt.Suggest{}
+	for _, s := range searchResult {
+		description := "Not Official"
+		if s.IsOfficial {
+			description = "Official"
+		}
+		suggestions = append(suggestions, prompt.Suggest{Text: s.Name, Description: "(" + description + ") " + s.Description})
+	}
+	return suggestions
+}
+
+var commandExpression = regexp.MustCompile(`(?P<command>exec|stop|start|service|pull)\s{1}`)
+
+func getRegexGroups(text string) map[string]string {
+	if !commandExpression.Match([]byte(text)) {
+		return nil
+	}
+
+	match := commandExpression.FindStringSubmatch(text)
+	result := make(map[string]string)
+	for i, name := range commandExpression.SubexpNames() {
+		if i != 0 && name != "" {
+			result[name] = match[i]
+		}
+	}
+	return result
+}
+
+var memoryCache = cache.New(5*time.Minute, 10*time.Minute)
+
+func getFromCache(word string) []prompt.Suggest {
+	cacheKey := "all"
+	if word != "" {
+		cacheKey = fmt.Sprintf("completer:%s", word)
+	}
+	completer, found := memoryCache.Get(cacheKey)
+	if !found {
+		completer = imageFetchCompleter(word, 10)
+		memoryCache.Set(cacheKey, completer, cache.DefaultExpiration)
+	}
+	return completer.([]prompt.Suggest)
+}
+
 func completer(d prompt.Document) []prompt.Suggest {
 	word := d.GetWordBeforeCursor()
 
-	for _, cmd := range strings.Split(d.Text, " ") {
-		if strings.HasPrefix(cmd, "-") || strings.HasPrefix(cmd, "/") || cmd == "" {
-			continue
-		}
+	group := getRegexGroups(d.Text)
+	if group != nil {
+		command := group["command"]
 
-		lastValidKeyword = cmd
-	}
-
-	if word == "" {
-
-		if lastValidKeyword == "exec" || lastValidKeyword == "stop" || lastValidKeyword == "port" {
+		if command == "exec" || command == "stop" || command == "port" {
 			return containerListCompleter(false)
 		}
 
-		if lastValidKeyword == "start" {
+		if command == "start" {
 			return containerListCompleter(true)
 		}
 
-		if lastValidKeyword == "service" {
+		if command == "service" {
 			return dockerServiceCommandCompleter()
+		}
+
+		if command == "pull" {
+			if word != command {
+				return getFromCache(word)
+			}
+			return getFromCache("")
 		}
 	}
 
