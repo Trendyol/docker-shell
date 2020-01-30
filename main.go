@@ -16,6 +16,7 @@ import (
 
 	"docker.io/go-docker"
 	"docker.io/go-docker/api/types"
+	"docker.io/go-docker/api/types/registry"
 	"github.com/c-bata/go-prompt"
 	"github.com/patrickmn/go-cache"
 )
@@ -96,37 +97,24 @@ func isDockerCommand(kw string) bool {
 
 //DockerHubResult : Wrap DockerHub API call
 type DockerHubResult struct {
-	PageCount        *int             `json:"num_pages,omitempty"`
-	ResultCount      *int             `json:"num_results,omitempty"`
-	ItemCountPerPage *int             `json:"page_size,omitempty"`
-	CurrentPage      *int             `json:"page,omitempty"`
-	Query            *string          `json:"query,omitempty"`
-	Items            []DockerHubImage `json:"results,omitempty"`
+	PageCount        *int                    `json:"num_pages,omitempty"`
+	ResultCount      *int                    `json:"num_results,omitempty"`
+	ItemCountPerPage *int                    `json:"page_size,omitempty"`
+	CurrentPage      *int                    `json:"page,omitempty"`
+	Query            *string                 `json:"query,omitempty"`
+	Items            []registry.SearchResult `json:"results,omitempty"`
 }
 
-//DockerHubImage : Wrap image results of DockerHub API call
-type DockerHubImage struct {
-	Name        string `json:"name,omitempty"`
-	Description string `json:"description,omitempty"`
-	StarCount   int    `json:"star_count,omitempty"`
-	IsTrusted   *bool  `json:"is_trusted,omitempty"`
-	IsAutomated bool   `json:"is_automated,omitempty"`
-	IsOffical   *bool  `json:"is_official,omitempty"`
-}
-
-func imageFetchCompleter(imageName string, count int) []prompt.Suggest {
+func imageFromHubAPI(count int) []registry.SearchResult {
 	url := url.URL{
 		Scheme:   "https",
 		Host:     "registry.hub.docker.com",
-		Path:     "/v1/search",
-		RawQuery: "q=" + url.PathEscape(imageName) + "&n=" + strconv.Itoa(count),
+		Path:     "/v2/repositories/library",
+		RawQuery: "page=1&page_size=" + strconv.Itoa(count),
 	}
-	if imageName == "" {
-		url.Path = "/v2/repositories/library"
-		url.RawQuery = "page=1&page_size=" + strconv.Itoa(count)
-	}
+
 	client := &http.Client{
-	    Timeout: 2 * time.Second,
+		Timeout: 2 * time.Second,
 	}
 	apiURL := url.String()
 
@@ -145,18 +133,34 @@ func imageFetchCompleter(imageName string, count int) []prompt.Suggest {
 	decoder := json.NewDecoder(response.Body)
 	searchResult := &DockerHubResult{}
 	decoder.Decode(searchResult)
+	return searchResult.Items
+}
+
+func imageFromContext(imageName string, count int) []registry.SearchResult {
+	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+	defer cancel()
+	ctxResponse, err := dockerClient.ImageSearch(ctx, imageName, types.ImageSearchOptions{Limit: count})
+	if err != nil {
+		return nil
+	}
+	return ctxResponse
+}
+
+func imageFetchCompleter(imageName string, count int) []prompt.Suggest {
+	searchResult := []registry.SearchResult{}
+	if imageName == "" {
+		searchResult = imageFromHubAPI(10)
+	} else {
+		searchResult = imageFromContext(imageName, 10)
+	}
 
 	suggestions := []prompt.Suggest{}
-	for _, s := range searchResult.Items {
-		if s.IsOffical != nil {
-			description := "Not Offical"
-			if *s.IsOffical {
-				description = "Offical"
-			}
-			suggestions = append(suggestions, prompt.Suggest{Text: s.Name, Description: "(" + description + ") " + s.Description})
-			continue
+	for _, s := range searchResult {
+		description := "Not Official"
+		if s.IsOfficial {
+			description = "Official"
 		}
-		suggestions = append(suggestions, prompt.Suggest{Text: s.Name, Description: s.Description})
+		suggestions = append(suggestions, prompt.Suggest{Text: s.Name, Description: "(" + description + ") " + s.Description})
 	}
 	return suggestions
 }
