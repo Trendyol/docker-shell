@@ -192,7 +192,9 @@ func getFromCache(word string) []prompt.Suggest {
 	completer, found := memoryCache.Get(cacheKey)
 	if !found {
 		completer = imageFetchCompleter(word, 10)
-		memoryCache.Set(cacheKey, completer, cache.DefaultExpiration)
+		if len(completer.([]prompt.Suggest)) > 0 {
+			memoryCache.Set(cacheKey, completer, cache.DefaultExpiration)
+		}
 	}
 	return completer.([]prompt.Suggest)
 }
@@ -217,6 +219,15 @@ func completer(d prompt.Document) []prompt.Suggest {
 		}
 
 		if command == "pull" {
+
+			if len(strings.Split(d.Text, " ")) > 2 {
+				return []prompt.Suggest{}
+			}
+
+			if len(word) < 3 {
+				return []prompt.Suggest{}
+			}
+
 			if word != command {
 				return getFromCache(word)
 			}
