@@ -6,6 +6,8 @@ A simple interactive prompt for docker. Inspired from [kube-prompt](https://gith
 
 [![asciicast](https://asciinema.org/a/3CjSyThXZMO5ocosaKkuJLlAF.svg)](https://asciinema.org/a/3CjSyThXZMO5ocosaKkuJLlAF)
 
+[![asciicast](https://asciinema.org/a/3CjSyThXZMO5ocosaKkuJLlAF.svg)](https://asciinema.org/a/UCfYZNXCcVxIiqNKsAMtEhmiM)
+
 Features:
 
 * [X] Suggest docker commands
