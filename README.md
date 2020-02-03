@@ -6,7 +6,13 @@ A simple interactive prompt for docker. Inspired from [kube-prompt](https://gith
 
 [![asciicast](https://asciinema.org/a/3CjSyThXZMO5ocosaKkuJLlAF.svg)](https://asciinema.org/a/3CjSyThXZMO5ocosaKkuJLlAF)
 
+<h4>Image suggestion from docker hub</h4>
+
 [![asciicast](https://asciinema.org/a/UCfYZNXCcVxIiqNKsAMtEhmiM.svg)](https://asciinema.org/a/UCfYZNXCcVxIiqNKsAMtEhmiM)
+
+<h4>Port mapping suggestion</h4>
+
+[![asciicast](https://asciinema.org/a/7aWKWQJqqHZkpWZXwfy8AcrPj.svg)](https://asciinema.org/a/7aWKWQJqqHZkpWZXwfy8AcrPj)
 
 Features:
 
