@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"reflect"
 	"regexp"
 	"strconv"
 	"strings"
@@ -14,7 +15,7 @@ import (
 	"net/http"
 	"net/url"
 
-	"github.com/mstrYoda/docker-shell/lib"
+	commands "github.com/mstrYoda/docker-shell/lib"
 
 	"docker.io/go-docker"
 	"docker.io/go-docker/api/types"
@@ -96,7 +97,7 @@ func imageFetchCompleter(imageName string, count int) []prompt.Suggest {
 	return suggestions
 }
 
-var commandExpression = regexp.MustCompile(`(?P<command>exec|stop|start|service|pull)\s{1}`)
+var commandExpression = regexp.MustCompile(`(?P<command>exec|stop|start|service|pull|run)\s{1}`)
 
 func getRegexGroups(text string) map[string]string {
 	if !commandExpression.Match([]byte(text)) {
@@ -145,6 +146,12 @@ func completer(d prompt.Document) []prompt.Suggest {
 			return containerListCompleter(true)
 		}
 
+		if command == "run" {
+			if word == "-p" {
+				return portMappingSuggestion()
+			}
+		}
+
 		if command == "service" {
 			return shellCommands.GetDockerServiceSuggestions()
 		}
@@ -181,15 +188,29 @@ func containerListCompleter(all bool) []prompt.Suggest {
 	return suggestions
 }
 
+func portMappingSuggestion() []prompt.Suggest {
+	images, _ := dockerClient.ImageList(context.Background(), types.ImageListOptions{All: true})
+	suggestions := []prompt.Suggest{}
+
+	for _, image := range images {
+		inspection, _, _ := dockerClient.ImageInspectWithRaw(context.Background(), image.ID)
+
+		exposedPortKeys := reflect.ValueOf(inspection.Config.ExposedPorts).MapKeys()
+
+		for _, exposedPort := range exposedPortKeys {
+			portAndType := strings.Split(exposedPort.String(), "/")
+			port := portAndType[0]
+			portType := portAndType[1]
+			suggestions = append(suggestions, prompt.Suggest{Text: fmt.Sprintf("-p %s:%s/%s", port, port, portType), Description: inspection.RepoDigests[0]})
+		}
+	}
+
+	return suggestions
+}
+
 func main() {
 	dockerClient, _ = docker.NewEnvClient()
-	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
-
-	defer cancel()
-	
-	_, err := dockerClient.Info(ctx)
-	
-	if err != nil {
+	if _, err := dockerClient.Ping(context.Background()); err != nil {
 		fmt.Println("Couldn't check docker status please make sure docker is running.")
 		fmt.Println(err)
 		return
