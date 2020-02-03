@@ -150,6 +150,8 @@ func completer(d prompt.Document) []prompt.Suggest {
 			if word == "-p" {
 				return portMappingSuggestion()
 			}
+
+			return imagesSuggestion()
 		}
 
 		if command == "service" {
@@ -203,6 +205,18 @@ func portMappingSuggestion() []prompt.Suggest {
 			portType := portAndType[1]
 			suggestions = append(suggestions, prompt.Suggest{Text: fmt.Sprintf("-p %s:%s/%s", port, port, portType), Description: inspection.RepoDigests[0]})
 		}
+	}
+
+	return suggestions
+}
+
+func imagesSuggestion() []prompt.Suggest {
+	images, _ := dockerClient.ImageList(context.Background(), types.ImageListOptions{All: true})
+	suggestions := []prompt.Suggest{}
+
+	for _, image := range images {
+		ins, _, _ := dockerClient.ImageInspectWithRaw(context.Background(), image.ID)
+		suggestions = append(suggestions, prompt.Suggest{Text: image.ID[7:], Description: ins.RepoDigests[0]})
 	}
 
 	return suggestions
