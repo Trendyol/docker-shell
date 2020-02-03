@@ -13,7 +13,10 @@ Features:
 * [X] Suggest docker commands
 * [X] List container ids&names after docker exec/start/stop commands
 * [ ] Suggest command parameters based on typed command
-* [X] List images from docker hub after docker pull command
+* [X] List images from docker hub after docker pull command [v1.2.0](https://github.com/Trendyol/docker-shell/milestone/1)
+* [X] Suggest port mappings after docker run command [v1.3.0](https://github.com/Trendyol/docker-shell/milestone/2)
+* [X] Suggest available images after docker run command [v1.3.0](https://github.com/Trendyol/docker-shell/milestone/2)
+
 
 <h3>Installation</h3>
 
