@@ -4,7 +4,7 @@
 
 A simple interactive prompt for docker. Inspired from [kube-prompt](https://github.com/c-bata/kube-prompt) uses [go-prompt](https://github.com/c-bata/go-prompt).
 
-[![asciicast](https://asciinema.org/a/3CjSyThXZMO5ocosaKkuJLlAF.svg)](https://asciinema.org/a/3CjSyThXZMO5ocosaKkuJLlAF)
+[![asciicast](https://asciinema.org/a/AKDTBnD3gKKzACDdj7Tm670PJ.svg)](https://asciinema.org/a/AKDTBnD3gKKzACDdj7Tm670PJ)
 
 <h4>Image suggestion from docker hub</h4>
 
