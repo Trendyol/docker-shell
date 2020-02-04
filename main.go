@@ -80,10 +80,10 @@ func imageFromContext(imageName string, count int) []registry.SearchResult {
 
 func imageFetchCompleter(imageName string, count int) []prompt.Suggest {
 	searchResult := []registry.SearchResult{}
-	if imageName == "" {
-		searchResult = imageFromHubAPI(10)
-	} else {
+	if imageName != "" {
 		searchResult = imageFromContext(imageName, 10)
+	} else {
+		searchResult = imageFromHubAPI(10)
 	}
 
 	suggestions := []prompt.Suggest{}
@@ -124,9 +124,7 @@ func getFromCache(word string) []prompt.Suggest {
 	completer, found := memoryCache.Get(cacheKey)
 	if !found {
 		completer = imageFetchCompleter(word, 10)
-		if len(completer.([]prompt.Suggest)) > 0 {
-			memoryCache.Set(cacheKey, completer, cache.DefaultExpiration)
-		}
+		memoryCache.Set(cacheKey, completer, cache.DefaultExpiration)
 	}
 	return completer.([]prompt.Suggest)
 }
@@ -159,19 +157,10 @@ func completer(d prompt.Document) []prompt.Suggest {
 		}
 
 		if command == "pull" {
-
-			if len(strings.Split(d.Text, " ")) > 2 {
-				return []prompt.Suggest{}
-			}
-
-			if len(word) < 3 {
-				return []prompt.Suggest{}
-			}
-
-			if word != command {
+			if word == "" || len(word) > 2 {
 				return getFromCache(word)
 			}
-			return getFromCache("")
+			return []prompt.Suggest{}
 		}
 	}
 
