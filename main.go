@@ -4,6 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"net/http"
+	"net/url"
 	"os"
 	"os/exec"
 	"reflect"
@@ -12,15 +14,13 @@ import (
 	"strings"
 	"time"
 
-	"net/http"
-	"net/url"
-
-	commands "github.com/mstrYoda/docker-shell/lib"
-
 	"docker.io/go-docker"
 	"docker.io/go-docker/api/types"
 	"docker.io/go-docker/api/types/registry"
+
 	"github.com/c-bata/go-prompt"
+	"github.com/hashicorp/go-retryablehttp"
+	commands "github.com/mstrYoda/docker-shell/lib"
 	"github.com/patrickmn/go-cache"
 )
 
@@ -38,24 +38,22 @@ type DockerHubResult struct {
 }
 
 func imageFromHubAPI(count int) []registry.SearchResult {
+	client := retryablehttp.NewClient()
+	client.HTTPClient = &http.Client{
+		Timeout: 1 * time.Second,
+	}
+	client.RetryWaitMin = client.HTTPClient.Timeout
+	client.RetryWaitMax = client.HTTPClient.Timeout
+	client.RetryMax = 3
+	client.Logger = nil
 	url := url.URL{
 		Scheme:   "https",
 		Host:     "registry.hub.docker.com",
 		Path:     "/v2/repositories/library",
 		RawQuery: "page=1&page_size=" + strconv.Itoa(count),
 	}
-
-	client := &http.Client{
-		Timeout: 2 * time.Second,
-	}
 	apiURL := url.String()
-
-	req, err := http.NewRequest("GET", apiURL, nil)
-	if err != nil {
-		return nil
-	}
-	req.Header.Add("Content-Type", "application/json")
-	response, err := client.Do(req)
+	response, err := client.Get(apiURL)
 	if err != nil {
 		return nil
 	}
@@ -65,6 +63,10 @@ func imageFromHubAPI(count int) []registry.SearchResult {
 	decoder := json.NewDecoder(response.Body)
 	searchResult := &DockerHubResult{}
 	decoder.Decode(searchResult)
+	if searchResult.Items == nil || len(searchResult.Items) <= 0 {
+		return nil
+	}
+
 	return searchResult.Items
 }
 
@@ -75,15 +77,24 @@ func imageFromContext(imageName string, count int) []registry.SearchResult {
 	if err != nil {
 		return nil
 	}
+
+	if ctxResponse == nil || len(ctxResponse) <= 0 {
+		return nil
+	}
+
 	return ctxResponse
 }
 
 func imageFetchCompleter(imageName string, count int) []prompt.Suggest {
 	searchResult := []registry.SearchResult{}
-	if imageName == "" {
-		searchResult = imageFromHubAPI(10)
-	} else {
+	if imageName != "" {
 		searchResult = imageFromContext(imageName, 10)
+	} else {
+		searchResult = imageFromHubAPI(10)
+	}
+
+	if searchResult == nil || len(searchResult) <= 0 {
+		return nil
 	}
 
 	suggestions := []prompt.Suggest{}
@@ -124,9 +135,10 @@ func getFromCache(word string) []prompt.Suggest {
 	completer, found := memoryCache.Get(cacheKey)
 	if !found {
 		completer = imageFetchCompleter(word, 10)
-		if len(completer.([]prompt.Suggest)) > 0 {
-			memoryCache.Set(cacheKey, completer, cache.DefaultExpiration)
+		if completer.([]prompt.Suggest) == nil {
+			return []prompt.Suggest{}
 		}
+		memoryCache.Set(cacheKey, completer, cache.DefaultExpiration)
 	}
 	return completer.([]prompt.Suggest)
 }
@@ -159,19 +171,18 @@ func completer(d prompt.Document) []prompt.Suggest {
 		}
 
 		if command == "pull" {
-
-			if len(strings.Split(d.Text, " ")) > 2 {
+			if strings.Index(word, ":") != -1 || strings.Index(word, "@") != -1 {
 				return []prompt.Suggest{}
 			}
 
-			if len(word) < 3 {
-				return []prompt.Suggest{}
-			}
-
-			if word != command {
+			if word == "" || len(word) > 2 {
+				if len(strings.Split(d.Text, " ")) > 2 {
+					return []prompt.Suggest{}
+				}
 				return getFromCache(word)
 			}
-			return getFromCache("")
+
+			return []prompt.Suggest{}
 		}
 	}
 
@@ -224,12 +235,15 @@ func imagesSuggestion() []prompt.Suggest {
 
 func main() {
 	dockerClient, _ = docker.NewEnvClient()
-	if _, err := dockerClient.Ping(context.Background()); err != nil {
+	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+	defer cancel()
+
+	if _, err := dockerClient.Ping(ctx); err != nil {
 		fmt.Println("Couldn't check docker status please make sure docker is running.")
 		fmt.Println(err)
 		return
 	}
-
+	go getFromCache("")
 	for {
 		dockerCommand := prompt.Input(">>> docker ",
 			completer,
