@@ -108,7 +108,7 @@ func imageFetchCompleter(imageName string, count int) []prompt.Suggest {
 	return suggestions
 }
 
-var commandExpression = regexp.MustCompile(`(?P<command>exec|stop|start|service|pull|run)\s{1}`)
+var commandExpression = regexp.MustCompile(`(?P<command>exec|stop|start|run|service create|service inspect|service logs|service ls|service ps|service rollback|service scale|service update|service|pull|attach|build|commit|cp|create|events|export|history|images|import|info|inspect|kill|load|login|logs|ps|push|restart|rm|rmi|save|search|stack|stats|update|version)\s{1}`)
 
 func getRegexGroups(text string) map[string]string {
 	if !commandExpression.Match([]byte(text)) {
@@ -166,10 +166,6 @@ func completer(d prompt.Document) []prompt.Suggest {
 			return imagesSuggestion()
 		}
 
-		if command == "service" {
-			return shellCommands.GetDockerServiceSuggestions()
-		}
-
 		if command == "pull" {
 			if strings.Index(word, ":") != -1 || strings.Index(word, "@") != -1 {
 				return []prompt.Suggest{}
@@ -183,6 +179,9 @@ func completer(d prompt.Document) []prompt.Suggest {
 			}
 
 			return []prompt.Suggest{}
+		}
+		if val, ok := shellCommands.IsDockerSubCommand(command); ok {
+			return prompt.FilterHasPrefix(val, word, true)
 		}
 	}
 
