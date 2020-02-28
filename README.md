@@ -4,7 +4,18 @@ A simple interactive prompt for docker. Inspired from [kube-prompt](https://gith
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-ligthgreen.svg)](https://opensource.org/licenses/MIT) [![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-v1.4%20adopted-ff69b4.svg)](CONTRIBUTING.md)
 
-[![asciicast](https://asciinema.org/a/AKDTBnD3gKKzACDdj7Tm670PJ.svg)](https://asciinema.org/a/AKDTBnD3gKKzACDdj7Tm670PJ)
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+*Table Of Contents*
+
+- [Features:](#features)
+- [Installation](#installation)
+  - [Homebrew](#homebrew)
+  - [Build From Source Code](#build-from-source-code)
+- [How To Use](#how-to-use)
+- [How To Contribute](#how-to-contribute)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
 ## Features:
 
@@ -19,15 +30,30 @@ A simple interactive prompt for docker. Inspired from [kube-prompt](https://gith
 
 ### Homebrew
 
+You can install by using *homebrew*:
+
 ```bash
 brew tap trendyol/trendyol-tap
 
 brew install docker-shell
-  ```
+```
+
+### Build From Source Code
+
+You can build the command from source code by following the steps below:
+
+```bash
+> $ git clone git@github.com:Trendyol/docker-shell.git
+> $ cd docker-shell
+> $ sudo go build -o /usr/local/bin/docker-shell .
+> $ docker-shell
+```
 
 ## How To Use
 
-After install it you can type `docker-shell` and run interactive shell.
+After installation, you can type `docker-shell` and run the interactive shell.
+
+[![asciicast](https://asciinema.org/a/AKDTBnD3gKKzACDdj7Tm670PJ.svg)](https://asciinema.org/a/AKDTBnD3gKKzACDdj7Tm670PJ)
 
 *Image suggestion from docker hub*
 
