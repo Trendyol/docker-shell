@@ -43,10 +43,13 @@ brew install docker-shell
 You can build the command from source code by following the steps below:
 
 ```bash
-> $ git clone git@github.com:Trendyol/docker-shell.git
-> $ cd docker-shell
-> $ sudo go build -o /usr/local/bin/docker-shell .
-> $ docker-shell
+git clone git@github.com:Trendyol/docker-shell.git
+
+cd docker-shell
+
+sudo go build -o /usr/local/bin/docker-shell .
+
+docker-shell
 ```
 
 ## How To Use
