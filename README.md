@@ -33,3 +33,9 @@ A simple interactive prompt for docker. Inspired from [kube-prompt](https://gith
   `brew install docker-shell`
 
 After install it you can type `docker-shell` and run interactive shell.
+
+## How To Contribute
+
+Contributions are **welcome** and will be fully **credited**.
+
+Please read the [CONTRIBUTING](CONTRIBUTING.md) and [CODE_OF_CONDUCT](CODE_OF_CONDUCT) files for details.
