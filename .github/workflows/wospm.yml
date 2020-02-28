@@ -1,4 +1,4 @@
-name: WOSPM Checker
+name: Checks For Open Source
 on: [push]
 
 jobs:

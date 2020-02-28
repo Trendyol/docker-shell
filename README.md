@@ -17,14 +17,14 @@ A simple interactive prompt for Docker. Inspired from [kube-prompt](https://gith
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-## Features:
+## Features
 
-* [X] Suggest docker commands
-* [X] List container ids&names after docker exec/start/stop commands
-* [ ] Suggest command parameters based on typed command
-* [X] List images from docker hub after docker pull command [v1.2.0](https://github.com/Trendyol/docker-shell/milestone/1)
-* [X] Suggest port mappings after docker run command [v1.3.0](https://github.com/Trendyol/docker-shell/milestone/2)
-* [X] Suggest available images after docker run command [v1.3.0](https://github.com/Trendyol/docker-shell/milestone/2)
+- [X] Suggest docker commands
+- [X] List container ids&names after docker exec/start/stop commands
+- [ ] Suggest command parameters based on typed command
+- [X] List images from docker hub after docker pull command [v1.2.0](https://github.com/Trendyol/docker-shell/milestone/1)
+- [X] Suggest port mappings after docker run command [v1.3.0](https://github.com/Trendyol/docker-shell/milestone/2)
+- [X] Suggest available images after docker run command [v1.3.0](https://github.com/Trendyol/docker-shell/milestone/2)
 
 ## Installation 
 
@@ -58,11 +58,11 @@ After installation, you can type `docker-shell` and run the interactive shell.
 
 [![asciicast](https://asciinema.org/a/AKDTBnD3gKKzACDdj7Tm670PJ.svg)](https://asciinema.org/a/AKDTBnD3gKKzACDdj7Tm670PJ)
 
-*Image suggestion from docker hub*
+Image suggestion from docker hub:
 
 [![asciicast](https://asciinema.org/a/UCfYZNXCcVxIiqNKsAMtEhmiM.svg)](https://asciinema.org/a/UCfYZNXCcVxIiqNKsAMtEhmiM)
 
-*Port mapping suggestion*
+Port mapping suggestion:
 
 [![asciicast](https://asciinema.org/a/7aWKWQJqqHZkpWZXwfy8AcrPj.svg)](https://asciinema.org/a/7aWKWQJqqHZkpWZXwfy8AcrPj)
 
