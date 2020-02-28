@@ -26,7 +26,7 @@ A simple interactive prompt for Docker. Inspired from [kube-prompt](https://gith
 - [X] Suggest port mappings after docker run command [v1.3.0](https://github.com/Trendyol/docker-shell/milestone/2)
 - [X] Suggest available images after docker run command [v1.3.0](https://github.com/Trendyol/docker-shell/milestone/2)
 
-## Installation 
+## Installation
 
 ### Homebrew
 
