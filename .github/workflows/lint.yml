@@ -1,0 +1,14 @@
+name: Lint Actions
+on: [push]
+
+jobs:
+  markdownlint:
+    runs-on: ubuntu-latest
+    name: Markdown Linter
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: markdownlint-cli
+        uses: nosborn/github-action-markdown-cli@v1.1.1
+        with:
+          files: "README.md"
