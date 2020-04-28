@@ -45,7 +45,7 @@ You can build the command from source code by following the steps below:
 ```bash
 git clone git@github.com:Trendyol/docker-shell.git
 
-cd docker-shell
+cd docker-shell/cmd/docker_shell
 
 sudo go build -o /usr/local/bin/docker-shell .
 

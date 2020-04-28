@@ -1,4 +1,4 @@
-package commands
+package pkg
 
 import (
 	"github.com/c-bata/go-prompt"

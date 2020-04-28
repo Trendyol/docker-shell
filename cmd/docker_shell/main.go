@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/mstrYoda/docker-shell/pkg"
 	"net/http"
 	"net/url"
 	"os"
@@ -20,12 +21,11 @@ import (
 
 	"github.com/c-bata/go-prompt"
 	"github.com/hashicorp/go-retryablehttp"
-	commands "github.com/mstrYoda/docker-shell/lib"
 	"github.com/patrickmn/go-cache"
 )
 
 var dockerClient *docker.Client
-var shellCommands commands.Commands = commands.New()
+var shellCommands = pkg.New()
 
 //DockerHubResult : Wrap DockerHub API call
 type DockerHubResult struct {

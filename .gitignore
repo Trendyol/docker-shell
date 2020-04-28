@@ -1,0 +1,7 @@
+# Dependency directories (remove the comment below to include it)
+
+### Go Patch ###
+/vendor/
+
+# User-specific stuff
+.idea
