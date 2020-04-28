@@ -86,7 +86,7 @@ func imageFromContext(imageName string, count int) []registry.SearchResult {
 }
 
 func imageFetchCompleter(imageName string, count int) []prompt.Suggest {
-	searchResult := []registry.SearchResult{}
+	var searchResult []registry.SearchResult
 	if imageName != "" {
 		searchResult = imageFromContext(imageName, 10)
 	} else {
@@ -97,7 +97,7 @@ func imageFetchCompleter(imageName string, count int) []prompt.Suggest {
 		return nil
 	}
 
-	suggestions := []prompt.Suggest{}
+	var suggestions []prompt.Suggest
 	for _, s := range searchResult {
 		description := "Not Official"
 		if s.IsOfficial {
@@ -189,7 +189,7 @@ func completer(d prompt.Document) []prompt.Suggest {
 }
 
 func containerListCompleter(all bool) []prompt.Suggest {
-	suggestions := []prompt.Suggest{}
+	var suggestions []prompt.Suggest
 	ctx := context.Background()
 	cList, _ := dockerClient.ContainerList(ctx, types.ContainerListOptions{All: all})
 
@@ -202,7 +202,7 @@ func containerListCompleter(all bool) []prompt.Suggest {
 
 func portMappingSuggestion() []prompt.Suggest {
 	images, _ := dockerClient.ImageList(context.Background(), types.ImageListOptions{All: true})
-	suggestions := []prompt.Suggest{}
+	var suggestions []prompt.Suggest
 
 	for _, image := range images {
 		inspection, _, _ := dockerClient.ImageInspectWithRaw(context.Background(), image.ID)
@@ -222,7 +222,7 @@ func portMappingSuggestion() []prompt.Suggest {
 
 func imagesSuggestion() []prompt.Suggest {
 	images, _ := dockerClient.ImageList(context.Background(), types.ImageListOptions{All: true})
-	suggestions := []prompt.Suggest{}
+	var suggestions []prompt.Suggest
 
 	for _, image := range images {
 		ins, _, _ := dockerClient.ImageInspectWithRaw(context.Background(), image.ID)
