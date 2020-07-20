@@ -160,7 +160,15 @@ func completer(d prompt.Document) []prompt.Suggest {
 
 		if command == "run" {
 			if word == "-p" {
+				if len(portMappingSuggestions) > 0 {
+					return portMappingSuggestions
+				}
+
 				return portMappingSuggestion()
+			}
+
+			if len(suggestedImages) > 0 {
+				return suggestedImages
 			}
 
 			return imagesSuggestion()
@@ -200,6 +208,8 @@ func containerListCompleter(all bool) []prompt.Suggest {
 	return suggestions
 }
 
+var portMappingSuggestions []prompt.Suggest
+
 func portMappingSuggestion() []prompt.Suggest {
 	images, _ := dockerClient.ImageList(context.Background(), types.ImageListOptions{All: true})
 	suggestions := []prompt.Suggest{}
@@ -213,12 +223,24 @@ func portMappingSuggestion() []prompt.Suggest {
 			portAndType := strings.Split(exposedPort.String(), "/")
 			port := portAndType[0]
 			portType := portAndType[1]
-			suggestions = append(suggestions, prompt.Suggest{Text: fmt.Sprintf("-p %s:%s/%s", port, port, portType), Description: inspection.RepoDigests[0]})
+			suggestions = append(suggestions, prompt.Suggest{Text: fmt.Sprintf("-p %s:%s/%s", port, port, portType), Description: getDescription(inspection)})
 		}
 	}
 
+	portMappingSuggestions = suggestions
+
 	return suggestions
 }
+
+func getDescription(inspection types.ImageInspect) string {
+	desc := ""
+	if len(inspection.RepoDigests) > 0 && inspection.RepoDigests[0] != "" {
+		desc = inspection.RepoDigests[0]
+	}
+	return desc
+}
+
+var suggestedImages []prompt.Suggest
 
 func imagesSuggestion() []prompt.Suggest {
 	images, _ := dockerClient.ImageList(context.Background(), types.ImageListOptions{All: true})
@@ -226,8 +248,10 @@ func imagesSuggestion() []prompt.Suggest {
 
 	for _, image := range images {
 		ins, _, _ := dockerClient.ImageInspectWithRaw(context.Background(), image.ID)
-		suggestions = append(suggestions, prompt.Suggest{Text: image.ID[7:], Description: ins.RepoDigests[0]})
+		suggestions = append(suggestions, prompt.Suggest{Text: image.ID[7:19], Description: getDescription(ins)})
 	}
+
+	suggestedImages = suggestions
 
 	return suggestions
 }
@@ -271,5 +295,8 @@ func main() {
 		}
 
 		fmt.Println(string(res))
+
+		portMappingSuggestions = []prompt.Suggest{}
+		suggestedImages = []prompt.Suggest{}
 	}
 }
